@@ -1,13 +1,15 @@
 import React from "react";
 import "./App.css";
-import { LoginScreen } from "./screens(页面代码)/login";
-// import { ProjectListScreen } from "./screens(页面代码)/project-list";
+import { AuthenticatedApp } from "./authenticated-app(登录成功的app)";
+import { useAuth } from "./context(共享)/auth-context";
+import { UnauthenticatedApp } from "./unauthenticated-app(非登录的app)";
 
 function App() {
+  const { user } = useAuth();
+
   return (
     <div className="App">
-      {/* <ProjectListScreen /> */}
-      <LoginScreen />
+      {user ? <AuthenticatedApp /> : <UnauthenticatedApp />}
     </div>
   );
 }
