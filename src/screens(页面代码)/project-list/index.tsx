@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { List } from "./list";
 import { SearchPanel } from "./search-panel";
-import qs from "qs";
 import { clearObject } from "../../utils/clearObject";
 import { useMount } from "../../utils/useMount";
 import { useDebounce } from "../../utils/useDebounce";
+import { useHttp } from "../../utils/http";
 
-const apiUrl = process.env.REACT_APP_API_URL;
+// const apiUrl = process.env.REACT_APP_API_URL;
 
 export const ProjectListScreen = () => {
   // 使用状态提升分享组件状态
@@ -21,44 +21,19 @@ export const ProjectListScreen = () => {
   const [users, setUsers] = useState([]);
   // list  表格数据   从后端的projects数据获取
   const [list, setList] = useState([]);
-
-  // useEffect(() => {
-  //     fetch(`${apiUrl}/users`).then(async res => {
-  //         if (res.ok) {
-  //             setUsers(await res.json())
-  //         }
-  //     })
-  // },[])
+  // 自定义一个hook来简化fetch
+  const client = useHttp();
 
   // 使用自定义hooks
   useMount(() => {
-    fetch(`${apiUrl}/users`).then(async (res) => {
-      if (res.ok) {
-        setUsers(await res.json());
-      }
-    });
+    client("users").then(setUsers);
   });
-
-  // ?name=${param.name}&personId=${param.personId} 比较麻烦 安装 yarn add qs
-  // useEffect(() => {
-  //     fetch(`${apiUrl}/projects?${qs.stringify(clearObject(param))}`).then(async res => {
-  //         if (res.ok) {
-  //             setList(await res.json())
-  //         }
-  //     })
-  // }, [param])
 
   // 使用自定义hook useDebounce 减少工程搜索频率
   const debounce = useDebounce(param, 2000);
   useEffect(() => {
-    fetch(`${apiUrl}/projects?${qs.stringify(clearObject(debounce))}`).then(
-      async (res) => {
-        if (res.ok) {
-          setList(await res.json());
-        }
-      }
-    );
-  }, [debounce]);
+    client("projects", { data: clearObject(debounce) }).then(setList);
+  }, [debounce, client]);
 
   return (
     <div>
